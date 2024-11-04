@@ -39,7 +39,7 @@ class WheelyEnv(gym.Env):
         p1_xy = self.data.xpos[body_wheely.id][:2]
         p2_xy = self.data.xpos[body_goal.id][:2]
         
-        reward = -1. * np.linalg.norm( p2_xy - p1_xy )
+        reward = -1. * np.linalg.norm( p2_xy - p1_xy ) / 100
 
         return reward
     

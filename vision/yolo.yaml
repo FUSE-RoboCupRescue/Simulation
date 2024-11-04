@@ -1,0 +1,7 @@
+train: ./ladolt_dataset/images/train
+val: ./ladolt_dataset/images/val
+
+names:
+  - ladolt
+
+nc: 1

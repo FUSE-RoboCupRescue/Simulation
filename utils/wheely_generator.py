@@ -12,10 +12,14 @@ wheel_depth = .1
 flipper_dims[0] = wheel_space * flipper_wheel_count
 flipper_dims[2] = base_dims[2]
 
-wheel_max_torque = 10
-flipper_max_torque = 100
+wheel_max_torque = 5
+flipper_max_torque = 50
+arm_max_torque = 5
 
 obstacle_color = [.8, .8, .0]
+arm_stiffness = 1
+
+with_arm = False
 
 
 def obstacles():
@@ -72,6 +76,42 @@ def end():
 </mujoco>"""
 
 
+def make_arm():
+    text = f"""
+    <body name="arm" pos=".3 0 .2">
+        <joint name="arm_joint0" axis="0 0 1" stiffness="{arm_stiffness}"/>
+        <body name="arm_base" pos="0 0 0">
+            <geom type="cylinder" size=".1 .05" rgba="0.3 0.3 0.3 1"/>
+
+            <body name="arm_piece0" pos="0 0 .05">
+                <joint name="arm_joint1" axis="0 1 0" stiffness="1"/>
+
+                <body name="arm_piece1" pos="0 -.07 .25">
+                    <geom type="cylinder" size=".03 .2" rgba="0.3 0.3 0.3 1"/>
+
+                    <body name="arm_piece2" pos="0 .07 .25">
+                        <joint name="arm_joint2" axis="0 1 0" stiffness="{arm_stiffness}"/>
+                        <body name="arm_piece3" pos="0 0 .25">
+                            <geom type="cylinder" size=".03 .2" rgba="0.3 0.3 0.3 1"/>
+                        </body>
+
+                        <body name="arm_piece4" pos="0 0 .55">
+                            <joint name="arm_joint3" axis="0 0 1" stiffness="{arm_stiffness}"/>
+                            <body name="hand" pos="0 0 0">
+                                <geom type="box" size=".05 .1 .05" rgba=".5 0 0 1"/>
+                            </body>
+                    </body>
+
+                    </body>
+
+                </body>
+
+            </body>
+        </body>
+    </body>
+    """
+    return text
+
 def make_flipper(idx, pos, offset, front):
     text = f"""<body name="flipper{idx}" pos="{pos[0]} {pos[1]} {pos[2]}">
                 <joint name="jointf{idx}" stiffness="100" damping="1"  type="hinge" axis="0 1 0"/>
@@ -106,6 +146,8 @@ def gen(timestep: float=.002) -> str:
     generated_xml_path = "./xml_files/wheely.xml"
     gen_file = open(generated_xml_path, 'w')
     gen_file.write(begin(timestep))
+    if with_arm:
+        gen_file.write(make_arm())
 
     for i in range(wheel_count):
         pos_x = (base_dims[0]/wheel_count)*i*2 - base_dims[0] + wheel_diameter
@@ -202,6 +244,12 @@ def gen(timestep: float=.002) -> str:
 
     gen_file.write(end())
 
+    arm_indices = []
+    for i in range(4):
+        gen_file.write(f'<motor joint="arm_joint{i}" ctrlrange="{-arm_max_torque} {arm_max_torque}"/>')
+        arm_indices.append(index)
+        index += 1
+
     info = {
         "base_wheel_count": wheel_count,
         "flipper_wheel_count": flipper_wheel_count,
@@ -211,8 +259,10 @@ def gen(timestep: float=.002) -> str:
         "flipper_indices_1": flipper_indices_1,
         "flipper_indices_2": flipper_indices_2,
         "flipper_indices_3": flipper_indices_3,
+        "arm_indices_3": arm_indices,
         "flipper_max_torque": flipper_max_torque,
-        "track_max_torque": wheel_max_torque
+        "track_max_torque": wheel_max_torque,
+        "arm_max_torque": arm_max_torque
     }
 
     return generated_xml_path, info

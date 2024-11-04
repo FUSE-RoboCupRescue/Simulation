@@ -3,3 +3,9 @@
 __pycache__/
 xml_files/wheely.xml
 data/
+datasets/
+logs/
+MUJOCO_LOG.TXT
+runs/
+*.pt
+*.pyc

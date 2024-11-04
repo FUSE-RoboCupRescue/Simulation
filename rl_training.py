@@ -6,7 +6,7 @@ from enviroments.mj_enviroments import WheelyEnv
 env = WheelyEnv()
 
 model = SAC("MlpPolicy", env, verbose=1)
-model.learn(total_timesteps=1, log_interval=1)
+model.learn(total_timesteps=10_000_000, log_interval=1)
 model.save("./data/models/wheely_ai")
 
 del model
